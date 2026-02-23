@@ -1,0 +1,37 @@
+---
+title: "seurat_to_anndata"
+output: html_document
+date: "2026-02-22"
+---
+Converting v1 Seurat Object into anndata
+```{r setup, include=FALSE}
+library(Seurat)
+library(reticulate)
+library(anndata)
+```
+
+
+```{r setup, include=FALSE}
+load("~/Desktop/ancestors/GSE105010_fall.inDrops.RData")
+X_rna <- fall@data
+obs <- data.frame(clusters = as.character(fall@ident))
+rownames(obs) <- names(fall@ident)
+```
+
+```{r}
+obsm <- list(X_tsne = as.matrix(fall@tsne.rot),
+             X_pca = as.matrix(fall@pca.rot))
+```
+
+**Reticulate Anndata package**\
+Make sure you have selected a Python interpreter by checking RStudio>Tools>Global Options>Python
+```{r}
+anndata <- reticulate::import("anndata", convert = FALSE)
+
+adata <- anndata$AnnData(
+  X = Matrix::t(X_rna),
+  obs = obs,
+  obsm = obsm)
+
+write_h5ad(adata, "ZF3.h5ad") # File name for RNA Anndata
+```
